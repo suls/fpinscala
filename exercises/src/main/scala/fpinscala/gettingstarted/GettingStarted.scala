@@ -36,7 +36,21 @@ object MyModule {
 
   // Exercise 1: Write a function to compute the nth fibonacci number
 
-  def fib(n: Int): Int = ???
+  def fib(n: Int): Int = { 
+    if (n == 0) 0
+    else if(n == 1) 1
+    else fib(n-1) + fib(n-2)
+  }
+
+  def fib2(n: Long): Long = { 
+    @annotation.tailrec
+    def go(n: Long, prev: Long, curr: Long): Long =
+      if (n == 0) curr
+      //else if(n == 1) 1
+      else go(n-1, curr, curr+prev)
+    
+    go(n, 0, 1)  
+  }
 
   // This definition and `formatAbs` are very similar..
   private def formatFactorial(n: Int) = { 
@@ -129,7 +143,15 @@ object PolymorphicFunctions {
 
   // Exercise 2: Implement a polymorphic function to check whether 
   // an `Array[A]` is sorted
-  def isSorted[A](as: Array[A], gt: (A,A) => Boolean): Boolean = ??? 
+  def isSorted[A](as: Array[A], gt: (A,A) => Boolean): Boolean = {
+    @annotation.tailrec
+    def loop(idx: Int) : Boolean =
+      if(as.size-1 == idx) true
+      else if(gt(as(idx), as(idx+1))) loop(idx+1)
+      else false
+
+    loop(0)
+  } 
   
   // Polymorphic functions are often so constrained by their type
   // that they only have one implementation! Here's an example:
@@ -137,20 +159,34 @@ object PolymorphicFunctions {
   // Exercise 3: Implement `partial1`.
   
   def partial1[A,B,C](a: A, f: (A,B) => C): B => C = 
-    ??? 
+    f(a, _)
+
+  def partial1b[A,B,C](a: A, f: (A,B) => C): B => C = 
+    (b: B) => {
+      f(a, b)
+    }
   
+
   // Exercise 4: Implement `curry`.
 
   // Note that `=>` associates to the right, so we could 
   // write the return type as `A => B => C`
-  def curry[A,B,C](f: (A, B) => C): A => (B => C) =
-    ??? 
+  def curry[A,B,C](f: (A, B) => C): A => (B => C) = 
+    (a: A) => {
+      (b: B) => {
+        f(a, b)
+      }
+    }
+
 
   // NB: The `Function2` trait has a `curried` method already
 
   // Exercise 5: Implement `uncurry`
   def uncurry[A,B,C](f: A => B => C): (A, B) => C =
-    ??? 
+    (a: A, b: B) => {
+      val g = f(a)
+      g(b)
+    } 
 
   /*
   NB: There is a method on the `Function` object in the standard library,
@@ -165,5 +201,5 @@ object PolymorphicFunctions {
   // Exercise 6: Implement `compose`
 
   def compose[A,B,C](f: B => C, g: A => B): A => C =
-    ??? 
+    (a: A) => f(g(a)) 
 }
